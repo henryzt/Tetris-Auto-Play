@@ -4,17 +4,19 @@ from te_settings import Direction
 
 last = Direction.LEFT
 lastXPos = -1
+lastTile = None
 
 class AutoPlayer():
 
 
     ''' A very simple dumb AutoPlayer controller '''
     def __init__(self, controller):
-        global lastXPos, last
+        global lastXPos, last, lastTile
         self.controller = controller
         self.rand = Random()
-        last = Direction.LEFT
+        last = None
         lastXPos = -1
+        lastTile = None
       
 
     def next_move(self, gamestate):
@@ -24,21 +26,27 @@ class AutoPlayer():
 
 
     def toOneDirection(self, direction, gamestate):
-        global lastXPos, last
-        print(lastXPos)
-        if lastXPos != gamestate.get_falling_block_position()[0]:
+        global lastXPos, last, lastTile
+        
+        print(lastTile)
+        if (lastXPos != gamestate.get_falling_block_position()[0]):
+            
             lastXPos = gamestate.get_falling_block_position()[0]
             gamestate.move(direction)
         else:
-            print(last)
-            if last == Direction.LEFT :
-                last = Direction.RIGHT
-            else:
-                last = Direction.LEFT 
+            if lastTile != gamestate.get_falling_block_tiles():
+                lastTile = gamestate.get_falling_block_tiles()
+                print(last)
+                if last == Direction.LEFT:
+                    last = Direction.RIGHT
+                else:
+                    last = Direction.LEFT 
+                            
             
 
     def random_next_move(self, gamestate):
         global last
+        print("called")
         if last == Direction.LEFT :
             self.toOneDirection(Direction.LEFT,gamestate)
         else:
