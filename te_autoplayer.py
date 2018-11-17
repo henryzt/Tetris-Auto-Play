@@ -30,12 +30,12 @@ class AutoPlayer():
             lastXPos = gamestate.get_falling_block_position()[0]
             gamestate.move(direction)
         else:
+            print(last)
             if last == Direction.LEFT :
                 last = Direction.RIGHT
             else:
                 last = Direction.LEFT 
             
-
 
     def random_next_move(self, gamestate):
         global last
