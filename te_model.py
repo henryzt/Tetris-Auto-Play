@@ -29,6 +29,12 @@ class BlockBitmap():
             rows.append(newrow)
         return BlockBitmap(rows, self.colour)
 
+    def get_copy_of_tiles(self):
+        newrows = []
+        for row in self.rows:
+            newrows.append(tuple(row))
+        return newrows
+
     # the bounding box is the position of the top left and bottom
     # right corners of a rectangle that includes the whole shape
     def calculate_bounding_box(self):
@@ -153,6 +159,11 @@ class Block():
         return self.__bitmap.colour
 
     @property
+    def type(self):
+        ''' accessor function associated with getting from the type read-only attribute '''
+        return self.__type
+
+    @property
     def bounding_box(self):
         return self.__bitmap.bounding_box
 
@@ -211,6 +222,9 @@ class Block():
         self.__y = self.__y + 1
         return (False, 0)
 
+    def get_copy_of_tiles(self):
+        return self.__bitmap.get_copy_of_tiles()
+
 # BlockField holds all the blocks and pieces of blocks that have landed
 class BlockField():
     def __init__(self):
@@ -226,7 +240,10 @@ class BlockField():
         return self.__tiles
 
     def get_copy_of_tiles(self):
-        return self.__tiles.copy()
+        newtiles = []
+        for row in self.__tiles:
+            newtiles.append(tuple(row))
+        return newtiles
 
 
     #check for a collision if the block moves in the direction indicated by xoffset,yoffset
@@ -326,6 +343,20 @@ class Model():
     @property
     def falling_block_angle(self):
         return self.__falling_block.angle
+
+    @property
+    def falling_block_type(self):
+        return self.__falling_block.type
+
+    @property
+    def next_block_type(self):
+        return self.__next_block.type
+
+    def get_falling_block_tiles(self):
+        return self.__falling_block.get_copy_of_tiles()
+
+    def get_next_block_tiles(self):
+        return self.__next_block.get_copy_of_tiles()
 
     def get_copy_of_tiles(self):
         return self.__blockfield.get_copy_of_tiles()

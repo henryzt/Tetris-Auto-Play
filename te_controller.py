@@ -1,6 +1,6 @@
 from random import Random
 from tkinter import Tk
-from te_settings import Direction, MAXCOL, MAXROW, DEFAULT_AUTOPLAY
+from te_settings import Direction, MAXCOL, MAXROW, DEFAULT_AUTOPLAY, DISABLE_DISPLAY
 from te_model import Model
 from te_gamestate import GameState
 from te_view import View
@@ -8,17 +8,18 @@ from te_autoplayer import AutoPlayer
 
 class Controller():
     def __init__(self):
-        self.__root = Tk()
-        self.__windowsystem = self.__root.call('tk', 'windowingsystem')
-        self.__views = []
-        self.__root.bind_all('<Key>', self.key)
+        if not DISABLE_DISPLAY:
+            self.__root = Tk()
+            self.__windowsystem = self.__root.call('tk', 'windowingsystem')
+            self.__root.bind_all('<Key>', self.key)
         self.__running = True
         self.__score = -1
         self.__autoplay = DEFAULT_AUTOPLAY
         self.__gen_random()
         self.__model = Model(self)
         self.__gamestate_api = GameState(self.__model)
-        self.__view = View(self.__root, self)
+        if not DISABLE_DISPLAY:
+            self.__view = View(self.__root, self)
         self.__blockfield = self.__model.blockfield
         self.__lost = False
         self.__model.start()
@@ -42,16 +43,19 @@ class Controller():
         return self.randlist[self.rand_ix]
 
     def register_block(self, block):
-        self.__view.register_block(block)
+        if not DISABLE_DISPLAY:
+            self.__view.register_block(block)
 
     def unregister_block(self, block):
-        self.__view.unregister_block(block)
+        if not DISABLE_DISPLAY:
+            self.__view.unregister_block(block)
 
     def update_blockfield(self, blockfield):
         # we keep a reference to the blockfield in case we need to add
         # any views later
         self.__blockfield = blockfield
-        self.__view.update_blockfield(blockfield)
+        if not DISABLE_DISPLAY:
+            self.__view.update_blockfield(blockfield)
 
     #some helper functions to hide the controller implementation from
     #the model and the controller
@@ -64,8 +68,11 @@ class Controller():
 
     def game_over(self):
         self.__lost = True
-        for view in self.__views:
-            view.game_over()
+        if DISABLE_DISPLAY:
+            print("Score: ", self.__score)
+            self.__running = False
+        else:
+            self.__view.game_over()
 
     def key(self, event):
         if event.char == ' ':
@@ -83,11 +90,11 @@ class Controller():
         elif event.char == 'y':
             self.__autoplay = not self.__autoplay
             self.__model.enable_autoplay(self.__autoplay)
-            for view in self.__views:
-                view.show_autoplay(self.__autoplay)
+            if not DISABLE_DISPLAY:
+                self.__view.show_autoplay(self.__autoplay)
         elif event.char == 'r':
-            for view in self.__views:
-                view.clear_messages()
+            if not DISABLE_DISPLAY:
+                self.__view.clear_messages()
             self.__lost = False
             self.__model.restart()
             self.__model.enable_autoplay(self.__autoplay)
@@ -100,6 +107,8 @@ class Controller():
                     self.__model.reset_counts()
                     autoplayer.next_move(self.__gamestate_api)
                 (dropped, _landed) = self.__model.update()
-            self.__view.update()
-            self.__root.update()
-        self.__root.destroy()
+            if not DISABLE_DISPLAY:
+                self.__view.update()
+                self.__root.update()
+        if not DISABLE_DISPLAY:
+            self.__root.destroy()

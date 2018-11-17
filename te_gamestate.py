@@ -21,6 +21,55 @@ class GameState():
         '''
         return self.__model.falling_block_angle
 
+    def get_falling_block_tiles(self):
+        '''get_falling_block_tiles returns a copy of the current falling
+           block's tiles.  This is either a 3x3 or 4x4 list of lists, where 0
+           indicates no tile and anything else indicates a tile.
+
+           Most search strategies do not need to know the actual block
+           tiles - they only need to know the outcome when the block
+           lands, but some more advanced strategies might need this,
+           so I've added it based on a feature request.
+        '''
+        tilescopy = self.__model.get_falling_block_tiles()
+        return tilescopy
+
+    def get_next_block_tiles(self):
+        '''get_next_block_tiles returns a copy of the next block's tiles.
+           Format is the same as for get_falling_block_tiles().  Most
+           search strategies should not need this imformation.
+        '''
+        tilescopy = self.__model.get_next_block_tiles()
+        return tilescopy
+
+    def get_falling_block_type(self):
+        '''get_falling_block_type() returns a str denoting the current
+        falling block type I, J, L, O, S, T, Z
+        '''
+        return self.__model.falling_block_type
+
+    def get_next_block_type(self):
+        '''get_next_block_type() returns a str denoting the current
+        falling block type I, J, L, O, S, T, Z
+        '''
+        return self.__model.next_block_type
+
+    def print_block_tiles(self):
+        '''print out the falling block's times.  This function exists mostly
+          so you can see what get_falling_block_tiles() actually returns, but it
+          might be useful for debugging too.'''
+        tiles = self.get_falling_block_tiles()
+        txt = ""
+        size = len(tiles)
+        for _y in range(0, size):  # row 0 is the top row
+            for _x in range(0, size): # column 0 is the left column
+                if tiles[_y][_x] != 0:  # if there's no tile, the entry is zero
+                    txt += '#'
+                else:
+                    txt += '.'
+            txt += '\n'
+        print(txt)
+
     def get_tiles(self):
         '''get_tiles() returns a copy of the tiles that have settled in the
             arena.  The falling block is not included in these

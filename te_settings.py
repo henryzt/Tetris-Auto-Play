@@ -4,6 +4,10 @@ from enum import Enum
 #switch this to True to enable autoplaying by default
 DEFAULT_AUTOPLAY = False
 
+#switch this to True to disable the GUI.  Probably not useful unless
+#you default to autoplay.
+DISABLE_DISPLAY = False
+
 #settings below should not be changed
 GRID_SIZE = 30
 MAXROW = 20
