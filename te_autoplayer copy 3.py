@@ -38,8 +38,6 @@ class AutoPlayer():
             gamestate.move(Direction.LEFT)
         elif (position > gamestate.get_falling_block_position()[0]):
             gamestate.move(Direction.RIGHT)
-        # else:
-            # if lastTile != gamestate.get_falling_block_tiles():
                 
                             
             
