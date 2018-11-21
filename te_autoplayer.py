@@ -6,25 +6,34 @@ import random
 
 current = 19
 numToRotate = 0
-posToSkip = 0
+posToMoveTo = -1
 
 class AutoPlayer():
 
 
     ''' A very simple dumb AutoPlayer controller '''
     def __init__(self, controller):
-        global numToRotate, posToSkip, current
+        global numToRotate,  current, posToMoveTo
         self.controller = controller
         self.rand = Random()
         current = 19
         numToRotate = 0
-        posToSkip = 0
+        posToMoveTo = -1
       
 
     def next_move(self, gamestate):
+        global numToRotate, inProgress, current, posToMoveTo
         ''' next_move() is called by the game, once per move.
             gamestate supplies access to all the state needed to autoplay the game.'''
-        self.random_next_move(gamestate)
+        if self.isRowEmpty(gamestate.get_tiles()[19]) == True:
+            print("new game")
+            current = 19
+            numToRotate = 0
+            posToMoveTo = -1
+            inProgress = False
+
+
+        self.call_next(gamestate)
 
 
     def toPosition(self, gamestate, position):
@@ -33,7 +42,17 @@ class AutoPlayer():
             gamestate.move(Direction.LEFT)
         elif (position > gamestate.get_falling_block_position()[0]):
             gamestate.move(Direction.RIGHT)
-       
+    
+    def cloneMoveToPosition(self, clone, position):
+        while position != clone.get_falling_block_position()[0]:
+            clone.print_block_tiles()
+            print("moving")
+            print(position)
+            print(clone.get_falling_block_position()[0])
+            self.toPosition(clone, self.getPosToMove(clone,position))
+            clone.update()
+
+            
 
 
     def getNext(self, gamestate, list, value):
@@ -44,13 +63,13 @@ class AutoPlayer():
             i += 1
         return i
 
-    def getNextSkip(self, gamestate, list, value,skip):
+    def isRowEmpty(self, list):
         i = 0
         for x in list:
-            if x == value and i > skip:
-                return i                      
+            if x != 0:
+                return False                   
             i += 1
-        return i
+        return True
 
     def getBlockBottomStart(self,gamestate):
         listLen = len(gamestate.get_falling_block_tiles())
@@ -77,67 +96,130 @@ class AutoPlayer():
         return pos
 
 
+    def getRowScore(self,clone,rowNum):
+        lastEmpty = False
+        score = 0
+        row = clone.get_tiles()[rowNum]
 
-    def checkLandedPossible(self, gamestate,posToMove,posision,clone):
-        if posToMove == gamestate.get_falling_block_position()[0]:
-            while clone.update() != True:
-                None
-                # print("update")
-            print(clone.get_tiles()[current])
-        else:
-            return True
-        # gamestate.print_tiles()
-        print(clone.get_tiles()[current][posision])
-        if clone.get_tiles()[current][posision] == 0 and self.getNext(gamestate,clone.get_tiles()[current],0) != -1:
-            print("Block won't land to bottom")
-            gamestate.clone(False)
-            return False
-        return True
+        for x in row:
+            if x == 0:
+                if lastEmpty:
+                    score += 2
+                else:
+                    score += 1
+                lastEmpty = True
+            else:
+                score += 5
+                lastEmpty = False
+        
+        print("score: ")
+        print(score)
+        return score
 
-    def checkAllRotation(self, gamestate, posToMove, posision):
-        global numToRotate
-        betterOne = -1
-        clone = gamestate.clone(True)
-        for i in range(4):
-            print(clone.print_block_tiles())
-            if self.checkLandedPossible(gamestate,posToMove,posision,clone):
-                numToRotate = i
-                if self.checkLandedPossible(gamestate,posToMove,posision + 1,clone):
-                    betterOne = i
-                elif self.checkLandedPossible(gamestate,posToMove,posision - 1,clone):
-                    betterOne = i
-            clone.rotate(Direction.RIGHT)
-            self.toPosition(clone, posToMove)
-            self.toPosition(clone, posToMove)
-            self.toPosition(clone, posToMove)
-            clone.update()
+
+
+    def getLandedScore(self,clone):
+        score = clone.get_score()
+        while clone.update() != True:
+            print("update!")
+
+        print("landed")
+        newScore = clone.get_score()
+        bouns = 0
+        print(clone.get_tiles()[current])
+        print(newScore)
+        if newScore - score > 100:
+            bouns = 100
+        return bouns + self.getRowScore(clone,current)
+            
+
+    def checkAllRotation(self, gamestate,  posision):
+        # global numToRotate
+        maxMark = 0
+        rotate = 0
+        
+        print("check rotation")
+        for i in range(0,4):
+            clone = gamestate.clone(True)
+            print("rotate!!")
+            print(i)
+            for x in range(i):
+                clone.rotate(Direction.RIGHT)
+                clone.update()
+            
+            print("called")
+            for x in range (10):
+                self.toPosition(clone, self.getPosToMove(clone,posision))
+                clone.update()
+            print("ended")
+            clone.print_block_tiles()
+            cScore = self.getLandedScore(clone)
+            if cScore > maxMark:
+                maxMark = cScore
+                rotate = i
+            clone = gamestate.clone(False)
                 
-        if betterOne != -1:
-            numToRotate = betterOne
+        return maxMark, rotate
 
-        return numToRotate
 
-    def random_next_move(self, gamestate):
-        global current,numToRotate,posToSkip
+    def checkAllMoves(self, gamestate):
+        global current
+        maxMark = 0
+        rotate = 0
+        bestPos = 0
 
-        # print(gamestate.print_block_tiles())
-        # print(gamestate.get_tiles()[current])
+        for i in range(0,9):
+            print("check position:")
+            print(i)
+            cScore, cRotate = self.checkAllRotation(gamestate,i)
+            if cScore > maxMark :
+                maxMark = cScore
+                rotate = cRotate
+                bestPos = i
+        print("maxSore")
+        print(maxMark)
+        if maxMark == self.getRowScore(gamestate,current):
+            print("NOT POSSIBLE!!!")
+            current = current - 1
+        return bestPos, rotate
+
+    def getPosToMove(self,gamestate,position):
+        global current
 
         blockBottomStart = self.getNext(gamestate, self.getBlockBottomStart(gamestate), 1)
         if blockBottomStart == len(gamestate.get_falling_block_tiles()):
             blockBottomStart = 0
         
-        if posToSkip > 0:
-            leftMostEmpty = self.getNextSkip(gamestate,gamestate.get_tiles()[current],0, posToSkip)
-        else:
-            leftMostEmpty = self.getNext(gamestate,gamestate.get_tiles()[current],0)
+        posToMove = position - blockBottomStart
+        # print("bigger?")
+        # print(position + self.getBlockWidth(gamestate))
+        if position + self.getBlockWidth(gamestate) > 9:
+            # print("Bigger case!!!")
+            posToMove = position -( position + self.getBlockWidth(gamestate) - 9)
 
-        posToMove = leftMostEmpty - blockBottomStart
-        print("bigger?")
-        print(leftMostEmpty + self.getBlockWidth(gamestate))
-        if leftMostEmpty + self.getBlockWidth(gamestate) > 9:
-            print("Bigger case!!!")
-            posToMove = leftMostEmpty -( leftMostEmpty + self.getBlockWidth(gamestate) - 9)
+        return posToMove
+
+
+
+    def call_next(self, gamestate):
+        global current,numToRotate,inProgress, posToMoveTo
+
+        # print(gamestate.print_block_tiles())
+        # print(gamestate.get_tiles()[current])
+
+        # if posToSkip > 0:
+        #     leftMostEmpty = self.getNextSkip(gamestate,gamestate.get_tiles()[current],0, posToSkip)
+        # else:
+        #     leftMostEmpty = self.getNext(gamestate,gamestate.get_tiles()[current],0)
+        
+        if gamestate.get_falling_block_position()[1] == 1:
+            print("new block")
+            posToMoveTo, numToRotate = self.checkAllMoves(gamestate)
+
+        self.toPosition
+        
+
+        posToMove = self.getPosToMove(gamestate,posToMoveTo)
 
         if numToRotate > 0:
             print("rotate?")
@@ -146,29 +228,27 @@ class AutoPlayer():
             numToRotate -=1
             return
 
-        print("lme?")
-        print(leftMostEmpty)
-        print("pos?")
-        print(posToMove)
+        # print("lme?")
+        # print(posToMoveTo)
+        # print("pos?")
+        # print(posToMove)
 
-        gamestate.print_block_tiles()
-        self.getBlockWidth(gamestate)
+        # gamestate.print_block_tiles()
+        # self.getBlockWidth(gamestate)
 
-        if(self.checkLandedPossible(gamestate,posToMove,leftMostEmpty,gamestate.clone(True))): #self.checkPossible(gamestate,leftMostEmpty) and 
-            self.toPosition(gamestate, posToMove)
-            numToRotate = 0
-        else:
-            print("Can't land")
-            if(self.checkAllRotation(gamestate,posToMove,leftMostEmpty) != -1):
-                gamestate.rotate(Direction.RIGHT)
-                numToRotate -= 1
-            else:
-                print("!!!!!NOT POSSIBLE")
-                if leftMostEmpty < 9:
-                    posToSkip = leftMostEmpty
-                else:
-                    posToSkip = 0
-                    current -= 1
+        
+        self.toPosition(gamestate, posToMove)
+
+            # if(self.checkAllRotation(gamestate,posToMove,posToMoveTo) != -1):
+            #     gamestate.rotate(Direction.RIGHT)
+            #     numToRotate -= 1
+            # else:
+            #     print("!!!!!NOT POSSIBLE")
+            #     if leftMostEmpty < 9:
+            #         posToSkip = leftMostEmpty
+            #     else:
+            #         posToSkip = 0
+            #         current -= 1
 
                 
 
