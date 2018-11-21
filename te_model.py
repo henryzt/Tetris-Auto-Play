@@ -461,7 +461,7 @@ class Model():
     def enable_autoplay(self, state):
         self.__autoplay = state
         if state:
-            self.__move_time = 0.01  # play fast when autoplaying
+            self.__move_time = 0.1  # play fast when autoplaying
         else:
             self.__move_time = 0.5
 

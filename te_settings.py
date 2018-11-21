@@ -2,7 +2,7 @@
 from enum import Enum
 
 #switch this to True to enable autoplaying by default
-DEFAULT_AUTOPLAY = False
+DEFAULT_AUTOPLAY = True
 
 #switch this to True to disable the GUI.  Probably not useful unless
 #you default to autoplay.
