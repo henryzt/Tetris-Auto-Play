@@ -151,33 +151,32 @@ class AutoPlayer():
         # print(bouns)
         return bouns
 
-    def getUpperRowHoleScore(self, clone, posision):
+    def getUpperRowHoleScore(self, clone):
         tiles = clone.get_tiles()
         score = 0
-        # for x in range(len(clone.get_tiles()[current])):
-        if tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
-            # 1
-            # 0
-            # _
-            print("hole!!!!")
-            score -= 1
-        if tiles[current - 2][posision] != 0 and tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
-            # 1
-            # 0
-            # 0
-            # _
-            score -= 1
+        for x in range(len(clone.get_tiles()[current])):
+            if tiles[current - 1][x] != 0 and tiles[current][x] == 0:
+                # 1
+                # 0
+                # _
+                score -= 1
+            if tiles[current - 2][x] != 0 and tiles[current - 1][x] != 0 and tiles[current][x] == 0:
+                # 1
+                # 0
+                # 0
+                # _
+                score -= 1
         return score
 
-    def getPredictedScore(self, clone, posision):
+    def getPredictedScore(self, clone):
         global current
         # print("------")
         # print(self.getRowScore(clone,current)  + self.getLandedScore(clone) )
         scoreLanded = self.getLandedScore(clone) * 10
         scoreRow = self.getRowScore(clone, current)
-        #scoreHoles = self.getUpperRowHoleScore(clone, posision)
+        # scoreHoles = self.getUpperRowHoleScore(clone) * 10
 
-        return scoreLanded + scoreRow #+ scoreHoles
+        return scoreLanded + scoreRow  # + scoreHoles
 
     def checkAllRotation(self, gamestate, posision):
         # global numToRotate
@@ -199,7 +198,7 @@ class AutoPlayer():
                 clone.update()
             # print("ended")
             # clone.print_block_tiles()
-            cScore = self.getPredictedScore(clone, posision)
+            cScore = self.getPredictedScore(clone)
             if cScore > maxMark:
                 maxMark = cScore
                 rotate = i
@@ -258,14 +257,10 @@ class AutoPlayer():
             if current > 19:
                 current = 19
             possible = False
-            i = 0
             while possible == False:
                 posToMoveTo, numToRotate, possible = self.checkAllMoves(gamestate)
                 print("possible")
                 print(current)
-                i += 1
-                if i > 30:
-                    possible = True
             newGame = False
 
         # self.toPosition
@@ -277,7 +272,6 @@ class AutoPlayer():
             # print(numToRotate)
             gamestate.rotate(Direction.RIGHT)
             numToRotate -= 1
-            # gamestate.print_block_tiles()
             return
 
         # print("lme?")
