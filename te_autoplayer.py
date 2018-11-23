@@ -143,31 +143,97 @@ class AutoPlayer():
 
         # print("Landed Score:")
         newScore = clone.get_score()
-        bouns = 0
-        # print(clone.get_tiles()[current])
-        # print(newScore)
-        if newScore - score > 100:
-            bouns = 10
+        lines = int((newScore - score) / 100)
+        bouns = 10 * lines
         # print(bouns)
         return bouns
 
+    def getHeightScore(self,clone):
+        global current
+        tiles = clone.get_tiles()
+        i = 0
+        while self.isRowEmpty(tiles[19 - i]) == False:
+            i += 1
+            if 19 - i < 0:
+                break
+        print("Height")
+        print(i)
+        return i
+
     def getUpperRowHoleScore(self, clone, posision):
+        global current
         tiles = clone.get_tiles()
         score = 0
         # for x in range(len(clone.get_tiles()[current])):
-        if tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
-            # 1
-            # 0
-            # _
-            print("hole!!!!")
-            score -= 1
-        if tiles[current - 2][posision] != 0 and tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
-            # 1
-            # 0
-            # 0
-            # _
-            score -= 1
+        # if tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
+        #     None
+        #     # 1
+        #     # 0
+        #     # _
+        #     # print("hole!!!!")
+        #     # print(tiles[current - 1][posision])
+        #     # print(tiles[current][posision])
+        #     # print("hole!!!!")
+        # else:
+        #     score += 1
+        # if tiles[current - 2][posision] != 0 and tiles[current - 1][posision] != 0 and tiles[current][posision] == 0:
+        #     None
+        #     # 1
+        #     # 0
+        #     # 0
+        #     # _
+        #     # print("hole!!!!")
+        #     # print(tiles[current - 2][posision])
+        #     # print(tiles[current - 1][posision])
+        #     # print(tiles[current][posision])
+        #     # print("hole!!!!")
+        # else:
+        #     score += 1
+        # if tiles[current][posision] == 0:
+        #     for x in range(0, 3):
+        #         if tiles[current - x][posision] != 0:
+        #             print("hole!!" + tiles[current - x][posision])
+        #
+        #             score -= 1
+        #             break
+        # if tiles[current][posision] != 0:
+        #     for x in range(0, 3):
+        #         if tiles[current][posision - x] == 0:
+        #             # print("hole!!" )
+        #
+        #             score -= 1
+        #             break
+        height = self.getHeightScore(clone)
+
+
+        # min = posision - 3
+        # max = posision + 3
+        # if min < 0:
+        #     min = 0
+        # if max > 9:
+        #     max = 9
+
+
+        for x in range(0, 9):
+            highestNonEmpty = -1
+            for y in range(height):
+                cHeight = 19 - height + y
+                if height == 0:
+                    break
+                if tiles[cHeight][x] != 0:
+                    if highestNonEmpty < cHeight:
+                        highestNonEmpty = cHeight
+
+                if tiles[cHeight][x] == 0 and cHeight > highestNonEmpty and highestNonEmpty != -1:
+                    score = score - 1
+                    # return score
+                    print("Hole")
+
+        test = clone.print_tiles()
         return score
+
+
+
 
     def getPredictedScore(self, clone, posision):
         global current
@@ -175,9 +241,21 @@ class AutoPlayer():
         # print(self.getRowScore(clone,current)  + self.getLandedScore(clone) )
         scoreLanded = self.getLandedScore(clone) * 10
         scoreRow = self.getRowScore(clone, current)
-        #scoreHoles = self.getUpperRowHoleScore(clone, posision)
+        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 20
+        scoreHeight = - self.getHeightScore(clone) * 0.1
 
-        return scoreLanded + scoreRow #+ scoreHoles
+        # print("position-------------")
+        # print(posision)
+        # print("holes score:")
+        # print(scoreHoles)
+        # print("all score:")
+        # print(scoreLanded + scoreRow + scoreHoles)
+
+        total = scoreLanded + scoreRow + scoreHoles #+ scoreHeight #
+        print("TotalScore---------------")
+        print(total)
+
+        return total, scoreHoles
 
     def checkAllRotation(self, gamestate, posision):
         # global numToRotate
@@ -199,17 +277,16 @@ class AutoPlayer():
                 clone.update()
             # print("ended")
             # clone.print_block_tiles()
-            cScore = self.getPredictedScore(clone, posision)
+            cScore, testScore = self.getPredictedScore(clone, posision)
             if cScore > maxMark:
                 maxMark = cScore
-                rotate = i
             # clone = gamestate.clone(False)
 
         return maxMark, rotate
 
     def checkAllMoves(self, gamestate):
         global current, newGame
-        maxMark = -100
+        maxMark = -1000
         rotate = 0
         bestPos = 0
         count = 0
@@ -233,7 +310,7 @@ class AutoPlayer():
         # print(bestPos)
 
 
-        if bestPos == 0 and count >= 9 and newGame == False:
+        if count >= 9 and newGame == False:
             print("NOT POSSIBLE!!!")
             current = current - 1
             possible = False
