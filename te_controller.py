@@ -30,7 +30,7 @@ class Controller():
     # blocks.
     def __gen_random(self):
         self.__rand = Random()
-        self.__rand.seed(9)
+        self.__rand.seed(10)
         self.rand_ix = 0
         self.maxrand = 100000
         maxblocktype = 6 # there are 7 different block types, indexed 0 to 6

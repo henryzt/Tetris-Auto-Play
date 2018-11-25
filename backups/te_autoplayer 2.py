@@ -191,13 +191,13 @@ class AutoPlayer():
                     # else:
                     #     deduce -= 5
 
-                    if x == 0 or x == 9:
-                        deduce = deduce + 1
-
-                    if x < 9 and tiles[cHeight][x + 1] != 0:
-                        deduce = deduce + 1
-                    if x > 0 and tiles[cHeight][x - 1] != 0:
-                        deduce = deduce + 1
+                    # if x == 0 or x == 9:
+                    #     deduce = deduce + 1
+                    #
+                    # if x < 9 and tiles[cHeight][x + 1] != 0:
+                    #     deduce = deduce + 1
+                    # if x > 0 and tiles[cHeight][x - 1] != 0:
+                    #     deduce = deduce + 1
 
                     deduce = pow(deduce, 2)
                     score = score - deduce
@@ -231,14 +231,12 @@ class AutoPlayer():
     def getPredictedScore(self, clone, posision):
         global current
 
-        heightWeight = 20
-        if self.getHeightScore(clone) > 6:
-            heightWeight = 50
 
-        scoreLanded = self.getLandedScore(clone) * 20
+
+        scoreLanded = self.getLandedScore(clone) * 10
         scoreRow = self.getRowScore(clone, current)
         scoreHoles = self.getUpperRowHoleScore(clone, posision)
-        scoreHeight = - pow(self.getHeightScore(clone), 2) * heightWeight
+        scoreHeight = - pow(self.getHeightScore(clone), 2) * 20
         scoreBump = - self.getBumpinessScore(clone) * 30
 
         total = scoreLanded + scoreHoles + scoreHeight + scoreRow + scoreBump
