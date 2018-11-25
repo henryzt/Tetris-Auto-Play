@@ -149,7 +149,7 @@ class AutoPlayer():
         # print(bouns)
         return bouns
 
-    def getHeightScore(self,clone):
+    def getHeightScore(self, clone):
         global current
         tiles = clone.get_tiles()
         i = 0
@@ -252,40 +252,43 @@ class AutoPlayer():
         # print("all score:")
         # print(scoreLanded + scoreRow + scoreHoles)
 
-        total = scoreLanded + scoreRow + scoreHoles #+ scoreHeight #
+        total = scoreLanded + scoreRow #+ scoreHoles #+ scoreHeight #
         print("TotalScore---------------")
         print(total)
 
         return total, scoreHoles
 
-    def checkAllRotation(self, gamestate, posision):
+    def checkAllPosition(self, cloneFirst, rotation):
         # global numToRotate
         maxMark = -100
         rotate = 0
 
         # print("check rotation")
-        for i in range(0, 4):
-            clone = gamestate.clone(True)
+
+        for i in range(0, 10):
+            clone = cloneFirst.clone(True)
             # print("rotate!!")
             # print(i)
-            for x in range(i):
+            for x in range(0, rotation):
                 clone.rotate(Direction.RIGHT)
                 clone.update()
 
             # print("called")
             for x in range(10):
-                self.toPosition(clone, self.get_pos_to_move(clone, posision))
+                self.toPosition(clone, self.get_pos_to_move(clone, i))
                 clone.update()
-            # print("ended")
+            print("ended")
             # clone.print_block_tiles()
-            cScore, testScore = self.getPredictedScore(clone, posision)
+            cScore, testScore = self.getPredictedScore(clone, i)
             if cScore > maxMark:
                 maxMark = cScore
-                rotate = i
+                bestPos = i
                 realTestScore = testScore
             # clone = gamestate.clone(False)
 
-        return maxMark, rotate,realTestScore
+
+
+        return maxMark, bestPos,realTestScore
 
     def checkAllMoves(self, gamestate):
         global current, newGame
@@ -294,34 +297,35 @@ class AutoPlayer():
         bestPos = 0
         count = 0
         possible = True
-        maxCTest=0
+        maxCTest = 0
 
-        for i in range(0, 10):
 
-            # print("check position:")
-            # print(i)
-            cScore, cRotate, cTest = self.checkAllRotation(gamestate, i)
-            if cScore == maxMark:
-                count += 1
+        # print("check position:")
+        # print(i)
+        for i in range(0, 4):
+            clone = gamestate.clone(True)
+            cScore, cPos, cTest = self.checkAllPosition(clone, i)
+            # if cScore == maxMark:
+            #     count += 1
             if cScore > maxMark:
                 maxMark = cScore
-                rotate = cRotate
-                bestPos = i
-                maxCTest=cTest
+                rotate = i
+                bestPos = cPos
+                maxCTest = cTest
 
-        # print("maxSore")
-        # print(maxMark)
-        #
-        # print(bestPos)
-        print("Holes----------------------")
-        print(maxCTest)
+            # print("maxSore")
+            # print(maxMark)
+            #
+            # print(bestPos)
+            print("Holes----------------------")
+            print(maxCTest)
 
 
         if count >= 9 and newGame == False:
             print("NOT POSSIBLE!!!")
             current = current - 1
             possible = False
-            if current < 19 - self.get_line_hight(gamestate):
+            if current < 19 - self.getHeightScore(gamestate):
                 bestPos = random.random(0, 9)
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!Randomed")
                 possible = True
@@ -355,10 +359,10 @@ class AutoPlayer():
 
         # self.toPosition
 
-        temPosToMoveTo, temNumToRotate, temMark, temPossible = self.checkAllMoves(gamestate)
-        if temPossible and temMark > currentMark:
-            posToMoveTo = temPosToMoveTo
-            # numToRotate = temNumToRotate
+        # temPosToMoveTo, temNumToRotate, temMark, temPossible = self.checkAllMoves(gamestate)
+        # if temPossible and temMark > currentMark:
+        #     posToMoveTo = temPosToMoveTo
+        #     # numToRotate = temNumToRotate
 
 
         posToMove = self.get_pos_to_move(gamestate, posToMoveTo)
