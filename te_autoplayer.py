@@ -188,16 +188,18 @@ class AutoPlayer():
                     deduce = cHeight
                     if deduce < 10:
                         deduce = 10
+                    # else:
+                    #     deduce -= 5
 
-                    if x == 0 or x == 10:
-                        deduce = deduce + 10
+                    # if x == 0 or x == 9:
+                    #     deduce = deduce + 1
+                    #
+                    # if x < 9 and tiles[cHeight][x + 1] != 0:
+                    #     deduce = deduce + 1
+                    # if x > 0 and tiles[cHeight][x - 1] != 0:
+                    #     deduce = deduce + 1
 
-                    if x < 9 and tiles[cHeight][x + 1] != 0:
-                        deduce = deduce + 10
-                    if x > 0 and tiles[cHeight][x - 1] != 0:
-                        deduce = deduce + 10
-
-                    deduce = pow(19 - deduce,2)
+                    deduce = pow(deduce, 2)
                     score = score - deduce
                     hole = hole + 1
 
@@ -206,6 +208,24 @@ class AutoPlayer():
         return score
 
 
+    def getBumpinessScore(self,clone):
+
+        i = 0
+        for x in range(0, 9):
+            diff = abs(self.getColumnHeight(clone, x + 1) - self.getColumnHeight(clone, x))
+            if diff > 5:
+                diff = diff * 2
+            i += diff
+        return i
+
+
+    def getColumnHeight(self,clone,c):
+        tiles = clone.get_tiles()
+        for y in range(0, 20):
+            if tiles[y][c] != 0:
+                return 19 - y
+
+        return 0
 
 
     def getPredictedScore(self, clone, posision):
@@ -215,10 +235,11 @@ class AutoPlayer():
 
         scoreLanded = self.getLandedScore(clone) * 10
         scoreRow = self.getRowScore(clone, current)
-        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 5
-        scoreHeight = - pow(self.getHeightScore(clone), 2) * 5
+        scoreHoles = self.getUpperRowHoleScore(clone, posision)
+        scoreHeight = - pow(self.getHeightScore(clone), 2) * 20
+        scoreBump = - self.getBumpinessScore(clone) * 30
 
-        total = scoreLanded + scoreHoles + scoreHeight #+ scoreRow
+        total = scoreLanded + scoreHoles + scoreHeight + scoreRow + scoreBump
         print("LandScore---------------")
         print(scoreLanded)
         print("RowScore---------------")
@@ -227,6 +248,8 @@ class AutoPlayer():
         print(scoreHoles)
         print("HeightScore---------------")
         print(scoreHeight)
+        print("BumpScore---------------")
+        print(scoreBump)
         print("TotalScore---------------")
         print(total)
 
@@ -326,12 +349,12 @@ class AutoPlayer():
             newGame = False
 
         # self.toPosition
-        current = gamestate.get_falling_block_position()[1]
-        temPosToMoveTo, temNumToRotate, temMark = self.checkAllMoves(gamestate)
-        if temMark > currentMark:
-            currentMark = temMark
-            posToMoveTo = temPosToMoveTo
-            numToRotate = temNumToRotate
+        # current = gamestate.get_falling_block_position()[1]
+        # temPosToMoveTo, temNumToRotate, temMark = self.checkAllMoves(gamestate)
+        # if temMark > currentMark:
+        #     currentMark = temMark
+        #     posToMoveTo = temPosToMoveTo
+        #     numToRotate = temNumToRotate
 
         # posToMoveTo, numToRotate, currentMark = self.checkAllMoves(gamestate)
         # current = gamestate.get_falling_block_position()[1]
