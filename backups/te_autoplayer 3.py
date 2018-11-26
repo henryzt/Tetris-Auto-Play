@@ -48,7 +48,11 @@ class AutoPlayer():
 
     def cloneMoveToPosition(self, clone, position):
         while position != clone.get_falling_block_position()[0]:
-            self.toPosition(clone, self.getPosToMove(clone, position))
+            # clone.print_block_tiles()
+            # print("moving")
+            # print(position)
+            # print(clone.get_falling_block_position()[0])
+            self.toPosition(clone, self.get_pos_to_move(clone, position))
             clone.update()
 
     def getNext(self, list, value):
@@ -59,6 +63,13 @@ class AutoPlayer():
             i += 1
         return i
 
+    # def getNextSkip(self, list, value, startAfter):
+    #     i = 0
+    #     for x in list:
+    #         if x == value and i > startAfter:
+    #             return i
+    #         i += 1
+    #     return i
 
     def isRowEmpty(self, list):
         i = 0
@@ -92,7 +103,7 @@ class AutoPlayer():
                 count += 1
         return pos
 
-    def getPosToMove(self, gamestate, position):
+    def get_pos_to_move(self, gamestate, position):
         global current
 
         blockBottomStart = self.getNext( self.getBlockBottomStart(gamestate), 1)
@@ -180,13 +191,13 @@ class AutoPlayer():
                     # else:
                     #     deduce -= 5
 
-                    if x == 0 or x == 9:
-                        deduce = deduce + 1
-
-                    if x < 9 and tiles[cHeight][x + 1] != 0:
-                        deduce = deduce + 1
-                    if x > 0 and tiles[cHeight][x - 1] != 0:
-                        deduce = deduce + 1
+                    # if x == 0 or x == 9:
+                    #     deduce = deduce + 1
+                    #
+                    # if x < 9 and tiles[cHeight][x + 1] != 0:
+                    #     deduce = deduce + 1
+                    # if x > 0 and tiles[cHeight][x - 1] != 0:
+                    #     deduce = deduce + 1
 
                     deduce = pow(deduce, 2)
                     score = score - deduce
@@ -220,14 +231,12 @@ class AutoPlayer():
     def getPredictedScore(self, clone, posision):
         global current
 
-        heightWeight = 20
-        if self.getHeightScore(clone) > 7:
-            heightWeight = 50
 
-        scoreLanded = self.getLandedScore(clone) * 20
+
+        scoreLanded = self.getLandedScore(clone) * 10
         scoreRow = self.getRowScore(clone, current)
-        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 5
-        scoreHeight = - pow(self.getHeightScore(clone), 2) * heightWeight
+        scoreHoles = self.getUpperRowHoleScore(clone, posision)
+        scoreHeight = - pow(self.getHeightScore(clone), 2) * 20
         scoreBump = - self.getBumpinessScore(clone) * 30
 
         total = scoreLanded + scoreHoles + scoreHeight + scoreRow + scoreBump
@@ -263,8 +272,8 @@ class AutoPlayer():
 
             # print("called")
             counter = 0
-            while clone.get_falling_block_position()[0] != self.getPosToMove(clone, i):
-                self.toPosition(clone, self.getPosToMove(clone, i))
+            while clone.get_falling_block_position()[0] != self.get_pos_to_move(clone, i):
+                self.toPosition(clone, self.get_pos_to_move(clone, i))
                 clone.update()
                 counter += 1
                 if counter >20:
@@ -305,7 +314,10 @@ class AutoPlayer():
                 bestPos = cPos
                 maxCTest = cTest
 
-
+            # print("maxSore")
+            # print(maxMark)
+            #
+            # print(bestPos)
             print("Holes----------------------")
             print(maxCTest)
 
@@ -319,19 +331,48 @@ class AutoPlayer():
         global current, numToRotate, inProgress, posToMoveTo, newGame, currentMark
 
         if gamestate.get_falling_block_position()[1] == 1:
-
+            # currentMark = 0
+            # print("new block")
+            # current = current + 3
+            # if current > 19:
+            #     current = 19
             posToMoveTo, numToRotate, currentMark = self.checkAllMoves(gamestate)
-
+            # possible = False
+            # i = 0
+            # while possible == False:
+            #     posToMoveTo, numToRotate,currentMark, possible = self.checkAllMoves(gamestate)
+            #     print("possible")
+            #     print(current)
+            #     i += 1
+            #     if i > 30:
+            #         possible = True
             newGame = False
 
+        # self.toPosition
+        # current = gamestate.get_falling_block_position()[1]
+        # temPosToMoveTo, temNumToRotate, temMark = self.checkAllMoves(gamestate)
+        # if temMark > currentMark:
+        #     currentMark = temMark
+        #     posToMoveTo = temPosToMoveTo
+        #     numToRotate = temNumToRotate
 
-        posToMove = self.getPosToMove(gamestate, posToMoveTo)
+        # posToMoveTo, numToRotate, currentMark = self.checkAllMoves(gamestate)
+        # current = gamestate.get_falling_block_position()[1]
+        posToMove = self.get_pos_to_move(gamestate, posToMoveTo)
         if numToRotate > 0:
-
+            # print("rotate?")
+            # print(numToRotate)
             gamestate.rotate(Direction.RIGHT)
             numToRotate -= 1
-
+            # gamestate.print_block_tiles()
             return
 
+        # print("lme?")
+        # print(posToMoveTo)
+        # print("pos?")
+        # print(posToMove)
+
+        # gamestate.print_block_tiles()
+        # self.getBlockWidth(gamestate)
 
         self.toPosition(gamestate, posToMove)
