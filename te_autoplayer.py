@@ -208,6 +208,18 @@ class AutoPlayer():
         return i
 
 
+    def getShapeScore(self,clone):
+        score = 0
+        for x in range(0,10):
+            if x < 5:
+                score += self.getColumnHeight(clone,x) * (5 - x)
+            if x >= 5:
+                score += self.getColumnHeight(clone,x) * (x - 5)
+
+        return score
+
+
+
     def getColumnHeight(self,clone,c):
         tiles = clone.get_tiles()
         for y in range(0, 20):
@@ -220,17 +232,21 @@ class AutoPlayer():
     def getPredictedScore(self, clone, posision):
         global current
 
+        scoreRow = 0
+
         heightWeight = 20
         if self.getHeightScore(clone) > 7:
             heightWeight = 50
 
         scoreLanded = self.getLandedScore(clone) * 20
-        scoreRow = self.getRowScore(clone, current)
+        for i in range(0,20):
+            scoreRow += self.getRowScore(clone, i)
         scoreHoles = self.getUpperRowHoleScore(clone, posision) * 5
         scoreHeight = - pow(self.getHeightScore(clone), 2) * heightWeight
         scoreBump = - self.getBumpinessScore(clone) * 30
+        # scoreShape = self.getShapeScore(clone) * 5
 
-        total = scoreLanded + scoreHoles + scoreHeight + scoreRow + scoreBump
+        total = scoreLanded + scoreHoles + scoreHeight + scoreBump + scoreRow # + scoreShape
         print("LandScore---------------")
         print(scoreLanded)
         print("RowScore---------------")
@@ -241,6 +257,8 @@ class AutoPlayer():
         print(scoreHeight)
         print("BumpScore---------------")
         print(scoreBump)
+        # print("ShapeScore---------------")
+        # print(scoreShape)
         print("TotalScore---------------")
         print(total)
 
@@ -271,7 +289,7 @@ class AutoPlayer():
                     print("imposible!!!!")
                     break
 
-            print("ended")
+            # print("ended")
             # clone.print_block_tiles()
             cScore, testScore = self.getPredictedScore(clone, i)
             if cScore > maxMark:
@@ -326,10 +344,15 @@ class AutoPlayer():
 
 
         posToMove = self.getPosToMove(gamestate, posToMoveTo)
-        if numToRotate > 0:
+        if numToRotate != gamestate.get_falling_block_angle() :
 
             gamestate.rotate(Direction.RIGHT)
-            numToRotate -= 1
+            # numToRotate -= 1
+
+            return
+
+        if numToRotate >0 :
+            # numToRotate -= 1
 
             return
 
