@@ -177,8 +177,8 @@ class AutoPlayer():
                     deduce = cHeight
                     if deduce < 10:
                         deduce = 10
-                    # else:
-                    #     deduce -= 5
+                    else:
+                        deduce -= 5
 
                     if x == 0 or x == 9:
                         deduce = deduce + 1
@@ -212,9 +212,9 @@ class AutoPlayer():
         score = 0
         for x in range(0,10):
             if x < 5:
-                score += self.getColumnHeight(clone,x) * (5 - x)
+                score += self.getColumnHeight(clone, x) * (5 - x)
             if x >= 5:
-                score += self.getColumnHeight(clone,x) * (x - 5)
+                score += self.getColumnHeight(clone, x) * (x - 5)
 
         return score
 
@@ -239,14 +239,14 @@ class AutoPlayer():
             heightWeight = 50
 
         scoreLanded = self.getLandedScore(clone) * 20
-        for i in range(0,20):
-            scoreRow += self.getRowScore(clone, i)
-        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 5
+        for i in range(0, 20):
+            scoreRow += self.getRowScore(clone, i) * 5
+        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 7
         scoreHeight = - pow(self.getHeightScore(clone), 2) * heightWeight
         scoreBump = - self.getBumpinessScore(clone) * 30
-        # scoreShape = self.getShapeScore(clone) * 5
+        # scoreShape = self.getShapeScore(clone) * 10
 
-        total = scoreLanded + scoreHoles + scoreHeight + scoreBump + scoreRow # + scoreShape
+        total = scoreLanded + scoreHoles + scoreHeight + scoreBump + scoreRow  #+ scoreShape
         print("LandScore---------------")
         print(scoreLanded)
         print("RowScore---------------")
@@ -266,7 +266,7 @@ class AutoPlayer():
 
     def checkAllPosition(self, cloneFirst, rotation):
 
-        maxMark = -90000
+        maxMark = -90000000000
         bestPos = -1
         realTestScore = 0
         # print("check rotation")
@@ -303,7 +303,7 @@ class AutoPlayer():
 
     def checkAllMoves(self, gamestate):
         global current, newGame
-        maxMark = -90000
+        maxMark = -90000000000
         rotate = 0
         bestPos = 0
         count = 0
@@ -345,8 +345,11 @@ class AutoPlayer():
 
         posToMove = self.getPosToMove(gamestate, posToMoveTo)
 
-        if numToRotate > 0 and numToRotate != gamestate.get_falling_block_angle()  :
-            gamestate.rotate(Direction.RIGHT)
+        if numToRotate > 0 and numToRotate != gamestate.get_falling_block_angle():
+            if numToRotate == 3:
+                gamestate.rotate(Direction.LEFT)
+            else:
+                gamestate.rotate(Direction.RIGHT)
             return
 
 

@@ -177,16 +177,16 @@ class AutoPlayer():
                     deduce = cHeight
                     if deduce < 10:
                         deduce = 10
-                    else:
-                        deduce -= 5
+                    # else:
+                    #     deduce -= 5
 
-                    if x == 0 or x == 9:
-                        deduce = deduce + 1
-                    
-                    if x < 9 and tiles[cHeight][x + 1] != 0:
-                        deduce = deduce + 1
-                    if x > 0 and tiles[cHeight][x - 1] != 0:
-                        deduce = deduce + 1
+                    # if x == 0 or x == 9:
+                    #     deduce = deduce + 1
+                    #
+                    # if x < 9 and tiles[cHeight][x + 1] != 0:
+                    #     deduce = deduce + 1
+                    # if x > 0 and tiles[cHeight][x - 1] != 0:
+                    #     deduce = deduce + 1
 
                     deduce = pow(deduce, 2)
                     score = score - deduce
@@ -241,7 +241,7 @@ class AutoPlayer():
         scoreLanded = self.getLandedScore(clone) * 20
         for i in range(0, 20):
             scoreRow += self.getRowScore(clone, i) * 5
-        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 5
+        scoreHoles = self.getUpperRowHoleScore(clone, posision) * 7
         scoreHeight = - pow(self.getHeightScore(clone), 2) * heightWeight
         scoreBump = - self.getBumpinessScore(clone) * 30
         # scoreShape = self.getShapeScore(clone) * 10
